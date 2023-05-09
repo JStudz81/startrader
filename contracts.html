@@ -4,6 +4,6 @@
 
 <ul>
 <% data.forEach((contract, index) => { %>
-    <li>Faction: <%= contract.factionSymbol %> - Type: <%= contract.type %> - Accepted: <%= contract.accepted %></li>
+    <li>Faction: <%= contract.factionSymbol %> - Type: <%= contract.type %> - Accepted: <%= contract.accepted %><% if (!contract.accepted) {%><a href="/contracts/accept/<%= contract.id %>">Accept<% } %></a></li>
 <% }); %>
 </ul>

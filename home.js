@@ -2,6 +2,7 @@ const https = require('https');
 const http = require('http');
 const ejs = require('ejs');
 const fs = require('fs');
+var url = require('url');
 
 
 const hostname = '127.0.0.1';
@@ -11,23 +12,32 @@ const authToken = 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyI
 
 
 const server = http.createServer((req, res) => {
-    const url = req.url;
-    if(url ==='/agent') {
+
+    if(req.url ==='/agent') {
         agentRequest((resp) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/html');
-            console.log('Data: ' + resp.data)
             let template = applyHeader('agent.html');
             res.end(ejs.render(template, resp, {}));
         });
-    } else if (url === '/contracts') {
+    } else if (req.url === '/contracts') {
         contractRequest((resp) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'text/html');
-            console.log('Data: ' + JSON.stringify(resp.data));
             let template = applyHeader('contracts.html');
             res.end(ejs.render(template, resp, {}));
         })
+    } else if (req.url.includes('/contracts/accept')) {
+        
+        let id = req.url.replace("/contracts/accept/", "")
+        contractAccept(id, () => {
+            contractRequest((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'text/html');
+                let template = applyHeader('contracts.html');
+                res.end(ejs.render(template, resp, {}));
+            });
+        });
     } else {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
@@ -36,7 +46,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  console.log(`Server running at http://${hostname}:${port}/agent`);
 });
 
 function agentRequest(callback) {
@@ -77,6 +87,41 @@ function contractRequest(callback) {
             callback(JSON.parse(data));
         });
     });
+}
+
+function contractAccept(id, callback) {
+    const options = {
+        hostname: 'api.spacetraders.io',
+        port: 443,
+        path: '/v2/my/contracts/' + id + '/accept',
+        method: 'POST',
+        headers: {Authorization: authToken}
+      };
+
+    let request = https.request(options, (res) => {
+        if (res.statusCode !== 200) {
+        console.error(`Did not get an OK from the server. Code: ${res.statusCode}`);
+        res.resume();
+        return;
+        }
+    
+        let data = '';
+    
+        res.on('data', (chunk) => {
+        data += chunk;
+        });
+    
+        res.on('close', () => {
+            callback();
+        });
+    });
+
+    request.on('error', (e) => {
+        console.error(e);
+        callback();
+        request.end()
+      });
+    request.end();
 }
 
 function applyHeader(fileName) {
