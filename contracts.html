@@ -1,0 +1,9 @@
+<h3>Contracts</h3>
+
+<p>You have <%= meta.total %> contracts </p>
+
+<ul>
+<% data.forEach((contract, index) => { %>
+    <li>Faction: <%= contract.factionSymbol %> - Type: <%= contract.type %> - Accepted: <%= contract.accepted %></li>
+<% }); %>
+</ul>
