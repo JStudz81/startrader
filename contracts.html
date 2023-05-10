@@ -2,8 +2,16 @@
 
 <p>You have <%= meta.total %> contracts </p>
 
-<ul>
+
 <% data.forEach((contract, index) => { %>
-    <li>Faction: <%= contract.factionSymbol %> - Type: <%= contract.type %> - Accepted: <%= contract.accepted %><% if (!contract.accepted) {%><a href="/contracts/accept/<%= contract.id %>">Accept<% } %></a></li>
+    <h3>Faction: <%= contract.factionSymbol %> - Type: <%= contract.type %> - Accepted: <%= contract.accepted %><% if (!contract.accepted) {%><a href="/contracts/accept/<%= contract.id %>">Accept<% } %></a></h3>
+    <h4>Terms:</h4>
+    <ul>
+        <li>Deadline: <%= contract.terms.deadline %></li>
+        <li>Up Front Payment: <%= contract.terms.payment.onAccepted %></li>
+        <li>Payment on Completion <%= contract.terms.payment.onFulfilled %></li>
+        <% contract.terms.deliver.forEach(deliver => { %>
+            <li><b>Deliver:</b> <%= deliver.unitsRequired - deliver.unitsFulfilled %> <%= deliver.tradeSymbol %> <b>To:</b> <%= deliver.destinationSymbol %></li>
+        <% }); %>
+    </ul>
 <% }); %>
-</ul>

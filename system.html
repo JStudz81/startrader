@@ -1,0 +1,10 @@
+<h2>Current System: <%= data[0].systemSymbol %></h2>
+
+<% data.forEach(waypoint => { %>
+    <p><b><u><%= waypoint.type %> - <%= waypoint.symbol %></u></b></p> 
+    <ul>
+        <% waypoint.traits.forEach(trait => { %>
+            <li><%= trait.name %> - <%= trait.description %></li>
+        <% }) %>
+    </ul>
+<% }); %>

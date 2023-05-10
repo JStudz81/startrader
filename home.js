@@ -38,6 +38,22 @@ const server = http.createServer((req, res) => {
                 res.end(ejs.render(template, resp, {}));
             });
         });
+    } else if (req.url.includes('/system')) {
+        currentSystemWaypoints((resp) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html');
+            let template = applyHeader('system.html');
+            console.log(resp);
+            res.end(ejs.render(template, resp, {}));
+        });
+    } else if (req.url.includes('/myShips')) {
+        myShips((resp) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html');
+            let template = applyHeader('ships.html');
+            console.log(resp);
+            res.end(ejs.render(template, resp, {}));
+        });
     } else {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
@@ -124,9 +140,48 @@ function contractAccept(id, callback) {
     request.end();
 }
 
+function currentSystemWaypoints(callback) {
+    let request = https.get('https://api.spacetraders.io/v2/systems/X1-DF55/waypoints', {headers: {Authorization: authToken}} ,(res) => {
+        if (res.statusCode !== 200) {
+        console.error(`Did not get an OK from the server. Code: ${res.statusCode}`);
+        res.resume();
+        return;
+        }
+    
+        let data = '';
+    
+        res.on('data', (chunk) => {
+        data += chunk;
+        });
+    
+        res.on('close', () => {
+            callback(JSON.parse(data));
+        });
+    });
+}
+
+function myShips(callback) {
+    let request = https.get('https://api.spacetraders.io/v2/my/ships', {headers: {Authorization: authToken}} ,(res) => {
+        if (res.statusCode !== 200) {
+        console.error(`Did not get an OK from the server. Code: ${res.statusCode}`);
+        res.resume();
+        return;
+        }
+    
+        let data = '';
+    
+        res.on('data', (chunk) => {
+        data += chunk;
+        });
+    
+        res.on('close', () => {
+            callback(JSON.parse(data));
+        });
+    });
+}
+
 function applyHeader(fileName) {
     header = fs.readFileSync('header.html');
     return header + fs.readFileSync(fileName).toString();
 }
-
 

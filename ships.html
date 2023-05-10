@@ -1,0 +1,11 @@
+<% data.forEach(ship => { %>
+    <h2><%= ship.symbol %></h2>
+    <p><%= ship.frame.name %> - <%= ship.frame.description %></p>
+    <p>Current Waypoint: <%= ship.nav.waypointSymbol %></p>
+    <p>Cargo Capacity Remaining: <%= ship.cargo.capacity - ship.cargo.units %></p>
+    <ul>
+        <% ship.cargo.inventory.forEach(inv => { %>
+            <li><%= inv.units %> <%= inv.name %> - <%= inv.description %></li>
+        <% }) %>
+    </ul>
+<% }) %>
